@@ -1,9 +1,9 @@
 # Intro to Serverless
 ## A step-by-step guide to building serverless applications
 
-## [Chapter 0: Prerequisites](1-prerequisites.md)
+## [Chapter 0: Prerequisites](0-prerequisites.md)
 
-## Chapter 1: Hello World
+## [Chapter 1: Hello World](1-hello-world.md)
 
 ## Chapter 2: Lambda Event Triggers
 

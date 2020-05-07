@@ -1,4 +1,4 @@
-# 2 Hello World
+# 1 Hello World
 
 ## serverless.yml
 
