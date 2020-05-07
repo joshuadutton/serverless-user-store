@@ -1,0 +1,16 @@
+service: hello-world # name that's unique to your AWS account
+
+provider:
+  name: aws # Serverless Framework supports other providers too. See https://www.serverless.com/framework/docs/providers/
+  runtime: nodejs12.x # See https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html
+  stage: dev # Set the default stage used. Default is dev
+  memorySize: 512 # Default is 1024. See https://aws.amazon.com/lambda/pricing/
+  timeout: 30 # Default is 3 seconds. 30 seconds is the maximum for API Gateway. Maximum for Lambda is 900 seconds. See https://docs.aws.amazon.com/lambda/latest/dg/configuration-console.html
+
+functions: # Your Lambda functions
+  helloWord:  # Function name
+    handler: index.helloWorld # Reference to file index.js & exported function 'helloWorld'
+    events:   # The "Events" that trigger this function
+      - http: get hello-world # API Gateway event that maps to a GET request at the endpoint /hello-world (shorthand version)
+
+resources: # The "Resources" your Lambda functions use.  Raw AWS CloudFormation goes in here.
