@@ -22,7 +22,7 @@ Setup a non-root account user with admin permissions and `Programmatic access` f
 
 Install the AWS CLI using this guide: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
 
-Configure the CLI using this guide: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html. By the time you are done, you should have a file called `~/.aws/credentials` with your `access key ID` and `secret access key`.
+Configure the CLI using this guide: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html. By the time you are done, you should have a file called `~/.aws/credentials` with your `access key ID` and `secret access key`.
 
 Further reading: [Serverless Framework credentials guide](https://www.serverless.com/framework/docs/providers/aws/guide/credentials/)
 
