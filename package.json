@@ -15,8 +15,8 @@
 				"deploy": "serverless deploy"
 		},
 		"devDependencies": {
-        "@types/aws-serverless-express": "^3.3.3",
-        "@types/express": "^4.17.6",
+				"@types/aws-serverless-express": "^3.3.3",
+				"@types/express": "^4.17.6",
 				"@types/jest": "^25.2.1",
 				"@types/node": "^13.11.0",
 				"aws-sdk": "^2.674.0",
