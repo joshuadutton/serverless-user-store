@@ -1,5 +1,7 @@
 # 1 Hello World
 
+This is a chapter in the [Intro to Serverless](README.md) guide.
+
 ## serverless.yml
 
 Lambda functions can be configured in a lot of different ways. Serverless Framework simplifies this with a yaml configuration file. It is basically a shorthand for AWS CloudFormation, a templating system to deploy and configure AWS resources. As we will see, a simple serverless.yml file ends up doing quite a bit. 
@@ -26,6 +28,8 @@ resources: # The "Resources" your Lambda functions use.  Raw AWS CloudFormation 
 Further reading:
 - [Serverless Framework Services Guide](https://www.serverless.com/framework/docs/providers/aws/guide/services/)
 - [Serverless Framework Function Guide](https://www.serverless.com/framework/docs/providers/aws/guide/functions/)
+
+> Note: Why Serverless Framework? AWS is awesome and powerful. It continues to lead the way in cloud providers and supports the infrastructure for a large percentage of the internet. But with that power comes a lot of features and configuration. AWS is complicated and has a high learning curve. Even though it has good documentation, there is a lot of it, and it is often hard to find what you are looking for in the place you expect. Serverless Framework simplifies a lot of that complexity. I feel it's important to understand the basics of what's going on under the hood, but I am very grateful to not have to deal with all the details of many common tasks. AWS has also tried to address this issue themselves with tools like SAM and AppSync, but I haven't found either as easy to use and as understandable as Serverless Framework.
 
 ## index.js
 
@@ -63,20 +67,22 @@ serverless deploy
 ## Deployment diagram
 
 ```
-               ┌──────────────┐           ┌─────────────┐
-               │              │           │             │
-               │     API      │           │      λ      │
-◀────HTTPS────▶│   Gateway    │◀─────────▶│   Lambda    │
-               │              │           │             │
-               │              │           │             │
-               └──────────────┘           └─────────────┘
-                       │                  ┌─────────────┐
-    Includes all       │                  │             │
-     IAM access        │                  │ CloudWatch  │
-    permissions        └─────────────────▶│    Logs     │
-                                          │             │
-                                          │             │
-                                          └─────────────┘
+               ┌──────────────┐     ┌─────────────┐
+               │              │     │             │
+               │     API      │     │      λ      │
+◀────HTTPS────▶│   Gateway    │◀───▶│   Lambda    │
+               │              │     │             │
+               │              │     │             │
+               └──────────────┘     └─────────────┘
+                                           │       
+                                           ▼       
+                                    ┌─────────────┐
+            Includes all            │             │
+             IAM access             │ CloudWatch  │
+            permissions             │    Logs     │
+                                    │             │
+                                    │             │
+                                    └─────────────┘
 ```
 
 ## Generated CloudFormation template

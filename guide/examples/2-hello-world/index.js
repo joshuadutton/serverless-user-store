@@ -2,7 +2,7 @@ module.exports.helloWorld = async function(event, context) {
   // see example event object here: https://www.serverless.com/framework/docs/providers/aws/events/apigateway#example-lambda-proxy-event-default
   console.log(JSON.stringify(event)); // logs to CloudWatch
 
-  const name = event.queryStringParameters && event.queryStringParameters.name || 'unidentified user';
+  const name = event.queryStringParameters && event.queryStringParameters.name || 'world';
   
   const responseBody = {
     message: `hello ${name}!`
