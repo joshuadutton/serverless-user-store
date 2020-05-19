@@ -1,0 +1,101 @@
+service: serverless-user-store
+
+custom:
+  defaultStage: dev
+  userTable: 'serverless-user-store-${self:provider.stage}-user'
+  userBucket: 'serverless-user-store-${self:provider.stage}-user-unique' # needs a globally unique name
+  subscriptionTable: 'serverless-user-store-${self:provider.stage}-subscription'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: us-east-1
+  memorySize: 512 # default is 1024
+  timeout: 30 # max for API Gateway
+  apiKeys:
+    - api-key-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource:
+        - 'arn:aws:dynamodb:*:*:table/${self:custom.userTable}'
+        - 'arn:aws:dynamodb:*:*:table/${self:custom.subscriptionTable}'
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - 'arn:aws:s3:::${self:custom.userBucket}'
+        - 'arn:aws:s3:::${self:custom.userBucket}/*'
+    - Effect: Allow
+      Action: 'execute-api:Invoke'
+      Resource: 'arn:aws:execute-api:*:*:*'
+  environment:
+    USER_TABLE: ${self:custom.userTable}
+    USER_BUCKET: ${self:custom.userBucket}
+    SUBSCRIPTION_TABLE: ${self:custom.subscriptionTable}
+    REGION: ${self:provider.region}
+    DEBUG: true
+    STORE_TYPE: S3 # S3 or DynamoDB
+    STAGE: ${self:provider.stage}
+
+plugins:
+  # temp fix to hot reload issue (see https://github.com/dherault/serverless-offline/issues/864)
+  # is --useChildProcesses flag (see package.json) 
+  - serverless-plugin-typescript
+  - serverless-offline
+
+functions:
+  httpHandler:
+    handler: src/index.httpHandler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: "{proxy+}"
+          method: ANY
+  webSocketsHandler:
+    handler: src/index.webSocketsHandler
+    events:
+      - websocket: $connect
+      - websocket: $disconnect
+      - websocket: $default
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userTable}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    SubscriptionTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.subscriptionTable}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expires
+          Enabled: 'TRUE'
+        BillingMode: PAY_PER_REQUEST
+    UserBucket:
+      Type: AWS::S3::Bucket
+      Properties: 
+        BucketName: ${self:custom.userBucket} # must be globally unique

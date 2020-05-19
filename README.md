@@ -8,6 +8,20 @@ I use this project to teach others about Serverless architecture. Go to the the 
 
 ## Customization
 
-To make it more powerful and flexible, custom actions and reducers may be added to update a user's state following uniderectional data flow patterns. This is similar to front-end frameworks like Redux, but since we have no view framework to integrate with, no dependencies are needed. Find out how to implement these in guide.
+To make it more powerful and flexible, custom actions and reducers may be added to update a user's state following unidirectional data flow patterns. This is similar to front-end frameworks like Redux, but since we have no view framework to integrate with, no dependencies are needed. Find out how to implement these in guide.
 
-## Admin Interface
+
+### WebSocket Testing
+
+See data by subscribing to a thing using wscat:
+```
+npm install -g wscat
+```
+
+(replace <THING_ID> with the id of the thing you want to subscribe to):
+```
+wscat -c wss://<API_GATEWAY_URL> -H thing-id:<THING_ID>
+
+#local
+wscat -c http://localhost:3001 -H thing-id:<THING_ID>
+```
