@@ -1,8 +1,8 @@
-
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
-import ApiGatewayWebSockets, { ApiGatewayWebSocketEvent } from './lib/ApiGatewayWebSockets';
+import { ApiGatewayWebSocketEvent } from './lib/ApiGatewayWebSockets'
+import ApiGatewayWebSocketSubscriptions from './lib/ApiGatewayWebSocketSubscriptions';
 import * as log from './lib/log';
 import ApiGatewayExpress from './lib/ApiGatewayExpress';
 import UserRouter from './UserRouter';
@@ -19,7 +19,7 @@ const baseRouter = new BaseRouter(userRouter.store, auth);
 
 const apiGatewayExpressUser = new ApiGatewayExpress({ "(/dev)?/api/user": userRouter.router });
 const apiGatewayExpressBase = new ApiGatewayExpress({ "(/dev)?/": baseRouter.router });
-const apiGatewayWebSockets = new ApiGatewayWebSockets(region, subscriptionHandler, auth);
+const apiGatewayWebSocketSubscriptions = new ApiGatewayWebSocketSubscriptions(subscriptionHandler, auth);
 
 export function httpApiHandler(event: APIGatewayProxyEvent, context: Context) {
   log.logApiGatewayEvent(event, { onlyWhenDebug: true });
@@ -38,5 +38,5 @@ export async function authorizerHandler(event: any, context: Context) {
 
 export async function webSocketsHandler(event: ApiGatewayWebSocketEvent, context: Context) {
   log.logApiGatewayEvent(event, { onlyWhenDebug: true });
-  return apiGatewayWebSockets.handler(event, context);
+  return apiGatewayWebSocketSubscriptions.handler(event, context);
 }
