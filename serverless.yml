@@ -25,6 +25,7 @@ provider:
       Resource:
         - 'arn:aws:dynamodb:*:*:table/${self:custom.userTable}'
         - 'arn:aws:dynamodb:*:*:table/${self:custom.subscriptionTable}'
+        - 'arn:aws:dynamodb:*:*:table/${self:custom.passwordTable}'
     - Effect: Allow
       Action:
         - s3:ListBucket

@@ -4,7 +4,7 @@ This is a chapter in the [Intro to Serverless](README.md) guide.
 
 ## package.json
 
-We will need to add some dependencies. Package.json is a place to list dependencies, scripts, configuration, and project information. NPM is the Node Package Manager, but I prefer Yarn (created by Facebook FWIW). So let's install that globally:
+We will need to add some dependencies. Package.json is a place to list dependencies, scripts, configuration, and project information. NPM is the Node Package Manager, but I prefer Yarn (created by Facebook FWIW, but NPM was just bought by GitHub who was bought by Microsoft, so ¯\_(ツ)_/¯). So let's install that globally:
 
 ```bash
 npm install -g yarn
@@ -46,9 +46,9 @@ Add some scripts to your package.json:
 {
     ...
     "scripts": {
-				"start": "serverless offline start --useChildProcesses",
-				"deploy": "serverless deploy"
-		}
+        "start": "serverless offline start --useChildProcesses",
+        "deploy": "serverless deploy"
+    }
 }
 ```
 
