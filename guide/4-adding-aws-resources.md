@@ -147,4 +147,4 @@ const user = await s3.getObject({
 ```
 
 Further reading:
-
+- Serverless example projects: https://github.com/serverless/examples 
