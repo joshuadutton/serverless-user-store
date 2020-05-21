@@ -51,7 +51,7 @@ Further reading:
 - DynamoDB Best Practices: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html
 - Automated Backups: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html 
 
-### Adding an S3 bucket:
+### Adding a S3 bucket:
 
 ```yaml
 resources:

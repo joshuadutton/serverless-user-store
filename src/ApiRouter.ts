@@ -34,7 +34,7 @@ export default class UserRouter {
   }
 
   setupRoutes() {
-    this.router.get('/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
+    this.router.get('/user/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
         const user = await this.store.get(request.auth.user.id);
         response.json(user);
@@ -42,7 +42,7 @@ export default class UserRouter {
         next(error);
       }
     });
-    this.router.put('/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
+    this.router.put('/user/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
         const userId = request.auth.user.id;
         const user = { ...request.body, id: userId };
@@ -53,7 +53,7 @@ export default class UserRouter {
         next(error);
       }
     });
-    this.router.post('/self/action', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
+    this.router.post('/user/self/action', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
         const user = await this.store.updateState(request.auth.user.id, request.body, rootReducer);
         await this.subscriptionHandler.sendMessageToSubscribers(`${user.id}`, user);

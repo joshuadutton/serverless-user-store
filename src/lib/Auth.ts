@@ -5,6 +5,21 @@ import * as log from './log';
 import DynamoDBStore from './DynamoDBObjectStore';
 import { HttpError } from './HttpError';
 
+export interface IamPolicy {
+  principalId: string,
+  policyDocument: {
+    Version: string;
+    Statement: [
+      {
+        Effect: 'Allow' | 'Deny',
+        Action: string | string[],
+        Resource: string | string[],
+      }
+    ]
+  }
+  context: any,
+}
+
 type JWT = string;
 
 interface PersistedPassword {
@@ -151,18 +166,20 @@ export default class Auth {
     }
   }
 
-  async authHandler(event: any, context: any, scopes: string[]): Promise<any> {
+  async authHandler(event: any, context: any, scopes: string[]): Promise<IamPolicy> {
     try {
       const bearerToken = event.authorizationToken;
       const sub = await this.authorizeBearerToken(bearerToken, scopes);
       return this.generateIamPolicy({ id: sub }, 'Allow', event.methodArn);
     } catch(error) {
       log.error(error);
-      return Promise.reject(new HttpError(403, 'unauthorized'));
+      return this.generateIamPolicy({}, 'Deny', event.methodArn);
+      // TODO: this doesn't work with serverless-offline. Need to submit an issue/PR
+      // return Promise.reject('unauthorized');
     }
   }
 
-  private generateIamPolicy(userInfo: any, effect: 'Allow' | 'Deny', resource: string) {
+  private generateIamPolicy(userInfo: any, effect: 'Allow' | 'Deny', resource: string): IamPolicy {
     return {
       principalId: userInfo.id,
       policyDocument: {
