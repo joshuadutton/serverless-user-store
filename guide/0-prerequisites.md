@@ -1,4 +1,4 @@
-# 1 Prerequisites
+# 0 Prerequisites
 
 This is a chapter in the [Intro to Serverless](README.md) guide.
 

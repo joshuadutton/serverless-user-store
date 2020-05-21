@@ -22,8 +22,8 @@ npm install -g wscat
 
 (replace <TOKEN> with user auth token of the user you want to subscribe to):
 ```
-wscat -c wss://<API_GATEWAY_URL> -H Authorization:Bearer <TOKEN>
+wscat -c wss://<API_GATEWAY_URL> -H Authorization:"Bearer <TOKEN>"
 
 #local
-wscat -c http://localhost:3001 -H Authorization:Bearer <TOKEN>
+wscat -c http://localhost:3001 -H Authorization:"Bearer <TOKEN>"
 ```
