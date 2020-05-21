@@ -15,15 +15,15 @@ To make it more powerful and flexible, custom actions and reducers may be added 
 
 This project includes WebSockets subscriptions to get updates whenever the user object changes. Here is an easy way to test the WebSockets: 
 
-See data by subscribing to a thing using wscat:
+See data by subscribing to a user using wscat:
 ```
 npm install -g wscat
 ```
 
-(replace <THING_ID> with the id of the thing you want to subscribe to):
+(replace <TOKEN> with user auth token of the user you want to subscribe to):
 ```
-wscat -c wss://<API_GATEWAY_URL> -H thing-id:<THING_ID>
+wscat -c wss://<API_GATEWAY_URL> -H Authorization:Bearer <TOKEN>
 
 #local
-wscat -c http://localhost:3001 -H thing-id:<THING_ID>
+wscat -c http://localhost:3001 -H Authorization:Bearer <TOKEN>
 ```

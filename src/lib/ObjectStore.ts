@@ -1,7 +1,7 @@
-export default interface DataStore<T> {
+export default interface ObjectStore<T> {
   get(id: string): Promise<T | undefined>;
   put(id: string, item: T): Promise<T>;
-  delete(id: string);
+  delete(id: string): Promise<void>;
   updateState(id: string, action: Action, reducer: Reducer<T>): Promise<T>;
 }
 
@@ -16,7 +16,7 @@ export interface Action {
 // pure function that produces new state (see https://redux.js.org/basics/reducers/#handling-actions)
 export type Reducer<T> = (state: T, action: Action) => T;
 
-export async function actionHandler<T>(store: DataStore<T>, id: string, action: Action, reducer: Reducer<T>): Promise<T> {
+export async function actionHandler<T>(store: ObjectStore<T>, id: string, action: Action, reducer: Reducer<T>): Promise<T> {
   try {
     let state = await store.get(id);
     if (state) {

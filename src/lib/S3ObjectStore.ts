@@ -1,8 +1,8 @@
 import { S3, AWSError } from 'aws-sdk';
 
-import DataStore, { Action, Reducer, actionHandler } from './DataStore';
+import ObjectStore, { Action, Reducer, actionHandler } from './ObjectStore';
 
-export default class S3Store<T> implements DataStore<T> {
+export default class S3ObjectStore<T> implements ObjectStore<T> {
   private readonly s3: S3;
   private readonly bucketName: string;
   private readonly keyPrefix: string;
@@ -41,14 +41,15 @@ export default class S3Store<T> implements DataStore<T> {
     if (!value) {
       return Promise.reject(new Error('Value is required'));
     }
+    const putValue = { ...value, id };
     return this.s3.putObject({
       Bucket: this.bucketName,
       Key: this.s3KeyForId(id),
-      Body: JSON.stringify(value),
+      Body: JSON.stringify(putValue),
       ContentType: 'application/json',
       CacheControl: 'max-age=0',
     }).promise()
-    .then(() => value)
+    .then(() => putValue)
     .catch(error => this.errorWrapper(error, this.bucketName, 'putObject'));
   }
 

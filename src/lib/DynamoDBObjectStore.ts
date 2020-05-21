@@ -1,8 +1,8 @@
 import { DynamoDB, AWSError } from "aws-sdk";
 
-import DataStore, { Action, Reducer, actionHandler } from './DataStore';
+import ObjectStore, { Action, Reducer, actionHandler } from './ObjectStore';
 
-export default class DynamoDBStore<T> implements DataStore<T> {
+export default class DynamoObjectDBStore<T> implements ObjectStore<T> {
   private readonly db: DynamoDB.DocumentClient;
   private readonly tableName: string;
   private readonly timeToLiveSeconds?: number;

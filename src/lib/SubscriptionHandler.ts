@@ -1,4 +1,4 @@
-import DynamoDBStore from './DynamoDBStore';
+import DynamoDBObjectStore from './DynamoDBObjectStore';
 import { sendMessage } from './ApiGatewayWebSockets';
 
 export type CacheObject = Subscription | SubscriberMap;
@@ -7,6 +7,8 @@ export enum SubscriberType {
   WebSocket = "WebSocket", 
   PushNotification = "PushNotification"
 }
+
+const GONE_EXCEPTION_STATUS_CODE = 410;
 
 export type Subscriber = WebSocketSubscriber | PushNotificationSubscriber;
 
@@ -52,18 +54,18 @@ export class SubscriberMap {
 }
 
 export default class SubscriptionHandler {
-  private readonly cacheDataStore: DynamoDBStore<any>;
+  private readonly subscriptionStore: DynamoDBObjectStore<CacheObject>;
 
   constructor(region: string, cacheTableName: string) {
-    this.cacheDataStore = new DynamoDBStore<CacheObject>(cacheTableName, region);
+    this.subscriptionStore = new DynamoDBObjectStore<CacheObject>(cacheTableName, region);
   }
 
   async getSubscriptionForThing(id: string): Promise<Subscription | undefined> {
-    return this.cacheDataStore.get(id);
+    return this.subscriptionStore.get(id) as any;
   }
 
   async getSubscriberMapForSubscriber(id: string): Promise<SubscriberMap | undefined> {
-    return this.cacheDataStore.get(id);
+    return this.subscriptionStore.get(id) as any;
   }
 
   async subscribe(thingId: string, subscriber: Subscriber) {
@@ -73,8 +75,8 @@ export default class SubscriptionHandler {
     }
     subscription.subscribers.push(subscriber);
 
-    await this.cacheDataStore.put(thingId, subscription);
-    await this.cacheDataStore.put(subscriber.id, new SubscriberMap(subscriber.id, thingId));
+    await this.subscriptionStore.put(thingId, subscription);
+    await this.subscriptionStore.put(subscriber.id, new SubscriberMap(subscriber.id, thingId));
   }
 
   async unsubscribe(subscriberId: string) {
@@ -86,12 +88,12 @@ export default class SubscriptionHandler {
       if (subscription) {
         subscription.subscribers = subscription.subscribers.splice(subscription.subscribers.findIndex(subscriber => subscriber.id === thingId), 1);
         if (subscription.subscribers.length === 0) {
-          await this.cacheDataStore.delete(thingId);
+          await this.subscriptionStore.delete(thingId);
         } else {
-          await this.cacheDataStore.put(thingId, subscription);
+          await this.subscriptionStore.put(thingId, subscription);
         }
       }
-      await this.cacheDataStore.delete(subscriberId);
+      await this.subscriptionStore.delete(subscriberId);
     }
   }
 
@@ -107,7 +109,7 @@ export default class SubscriptionHandler {
           case SubscriberType.WebSocket: {
             return sendMessage(subscriber.id, subscriber.endpoint, JSON.stringify(message))
               .catch(error => {
-                if (error.errno === 'ECONNREFUSED') {
+                if (error.errno === 'ECONNREFUSED' || error.statusCode === GONE_EXCEPTION_STATUS_CODE) {
                   return this.unsubscribe(subscriber.id);
                 }
                 throw error;

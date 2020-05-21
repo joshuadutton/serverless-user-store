@@ -5,6 +5,9 @@ custom:
   userTable: 'serverless-user-store-${self:provider.stage}-user'
   userBucket: 'serverless-user-store-${self:provider.stage}-user-unique' # needs a globally unique name
   subscriptionTable: 'serverless-user-store-${self:provider.stage}-subscription'
+  passwordTable: 'serverless-user-store-${self:provider.stage}-password'
+  storeType: S3 # S3 or DynamoDB
+  debugLogs: true
 
 provider:
   name: aws
@@ -13,8 +16,6 @@ provider:
   region: us-east-1
   memorySize: 512 # default is 1024
   timeout: 30 # max for API Gateway
-  apiKeys:
-    - api-key-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -40,9 +41,10 @@ provider:
     USER_TABLE: ${self:custom.userTable}
     USER_BUCKET: ${self:custom.userBucket}
     SUBSCRIPTION_TABLE: ${self:custom.subscriptionTable}
+    PASSWORD_TABLE: ${self:custom.passwordTable}
     REGION: ${self:provider.region}
-    DEBUG: true
-    STORE_TYPE: S3 # S3 or DynamoDB
+    DEBUG: ${self:custom.debugLogs}
+    STORE_TYPE: ${self:custom.storeType}
     STAGE: ${self:provider.stage}
 
 plugins:
@@ -52,6 +54,23 @@ plugins:
   - serverless-offline
 
 functions:
+  authorizerFunction:
+    handler: src/index.authorizerHandler
+  httpApiHandler:
+    handler: src/index.httpApiHandler
+    events:
+      - http:
+          path: api/
+          method: ANY
+          authorizer:
+            name: authorizerFunction
+            resultTtlInSeconds: 3200
+      - http:
+          path: "api/{proxy+}"
+          method: ANY
+          authorizer:
+            name: authorizerFunction
+            resultTtlInSeconds: 3200
   httpHandler:
     handler: src/index.httpHandler
     events:
@@ -91,9 +110,17 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        TimeToLiveSpecification:
-          AttributeName: expires
-          Enabled: 'TRUE'
+        BillingMode: PAY_PER_REQUEST
+    PasswordTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.passwordTable}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
         BillingMode: PAY_PER_REQUEST
     UserBucket:
       Type: AWS::S3::Bucket

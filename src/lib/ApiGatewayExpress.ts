@@ -21,20 +21,32 @@ export default class ApiGatewayExpress {
     this.server = awsServerlessExpress.createServer(this.app);
   }
 
+  attachLogInfoMiddleware(request: any, response: Response, next: NextFunction) {
+    request.logInfo = { timestamp: Date.now() };
+    next();
+  }
+
+  attachUserAuthMiddleware(request: any, response: Response, next: NextFunction) {
+    const principalId = request.apiGateway?.event?.requestContext?.authorizer?.principalId;
+    if (principalId) {
+      request.auth = { user: { id: principalId }};
+    }
+    next();
+  }
+
   setupMiddlewareAndRoutes() {
-    this.app.use((request: any, response: Response, next: NextFunction) => {
-      request.logInfo = { timestamp: Date.now() };
-      next();
-    });
+    this.app.use(this.attachLogInfoMiddleware);
     this.app.use(awsServerlessExpressMiddleware.eventContext());
     this.app.use(bodyParser.json());
     this.app.use(log.accessLogMiddleware);
+    this.app.use(this.attachUserAuthMiddleware);
 
     Object.keys(this.routerMap).forEach(path => {
       this.app.use(path, this.routerMap[path]);
     });
 
     this.app.use(this.errorMiddleware);
+    this.app.use(this.notFoundMiddleware);
   }
 
   errorMiddleware(error: HttpError, request: Request, response: Response, next: NextFunction) {
@@ -43,10 +55,14 @@ export default class ApiGatewayExpress {
     const message = error.message || 'Unexpected Server Error';
     response
       .status(statusCode)
-      .send({
-        statusCode,
-        message,
-      });
+      .json({ statusCode, message });
+  }
+
+  notFoundMiddleware(request: Request, response: Response, next: NextFunction) {
+    const statusCode = 404;
+    response
+      .status(statusCode)
+      .json({ statusCode, message: 'Not Found' });
   }
 
   handler(event: APIGatewayProxyEvent, context: Context): void {

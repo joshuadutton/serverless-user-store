@@ -2,6 +2,7 @@ import { ApiGatewayManagementApi, AWSError } from 'aws-sdk';
 import { Context } from 'aws-lambda';
 import * as log from './log';
 import SubscriptionHandler, { WebSocketSubscriber } from './SubscriptionHandler';
+import Auth from './Auth';
 
 export interface ApiGatewayWebSocketEvent {
   requestContext: {
@@ -48,10 +49,12 @@ export async function sendMessage(connectionId: string, endpoint: string, messag
 export default class ApiGatewayWebSockets {
   region: string;
   subscriptionHandler: SubscriptionHandler;
+  auth: Auth;
 
-  constructor(region: string, subscriptionHandler: SubscriptionHandler) {
+  constructor(region: string, subscriptionHandler: SubscriptionHandler, auth: Auth) {
     this.region = region;
     this.subscriptionHandler = subscriptionHandler;
+    this.auth = auth;
   }
 
   async handler(event: ApiGatewayWebSocketEvent, context: Context): Promise<ApiGatewayWebSocketResult> {
@@ -60,7 +63,6 @@ export default class ApiGatewayWebSockets {
     const domain = event.requestContext.domainName;
     const stage = event.requestContext.stage;
     const headers: any = event.headers;
-    const thingId = headers && `${headers['thing-id']}`;
 
     let endpoint = `https://${domain}`;
     if (domain === 'localhost') {
@@ -69,17 +71,15 @@ export default class ApiGatewayWebSockets {
       endpoint = `https://${domain}/${stage}`;
     }
   
-    log.logApiGatewayWebsocket(routeKey, endpoint, connectionId, thingId)
+    
 
     try {
+      const userId = await this.auth.authorizeBearerToken(headers['Authorization'], ['self']);
+      log.logApiGatewayWebsocket(routeKey, endpoint, connectionId, userId)
       switch (routeKey) {
         case '$connect': {
-          if (thingId) {
-            const subscriber = new WebSocketSubscriber(connectionId, endpoint);
-            await this.subscriptionHandler.subscribe(thingId, subscriber);
-          } else {
-            throw new Error(`thing-id required in header`);
-          }
+          const subscriber = new WebSocketSubscriber(connectionId, endpoint);
+          await this.subscriptionHandler.subscribe(userId, subscriber);
           break;
         }
         case '$disconnect':

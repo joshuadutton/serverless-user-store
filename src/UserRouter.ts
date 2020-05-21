@@ -1,14 +1,22 @@
 import { Router, NextFunction, Request, Response } from 'express';
 
+interface RequestWithAuth extends Request {
+  auth: { 
+    user: {
+      id: string;
+    }
+  }
+}
+
 import SubscriptionHandler from './lib/SubscriptionHandler';
-import DataStore, { getEnvVar } from './lib/DataStore';
+import ObjectStore, { getEnvVar } from './lib/ObjectStore';
 import User, { rootReducer } from './User';
-import S3Store from './lib/S3Store';
-import DynamoDBStore from './lib/DynamoDBStore';
+import S3Store from './lib/S3ObjectStore';
+import DynamoDBStore from './lib/DynamoDBObjectStore';
 
 
-export default class VehicleRouter {
-  readonly store: DataStore<User>;
+export default class UserRouter {
+  readonly store: ObjectStore<User>;
   readonly router = Router();
   readonly subscriptionHandler: SubscriptionHandler;
 
@@ -26,27 +34,28 @@ export default class VehicleRouter {
   }
 
   setupRoutes() {
-    this.router.get('/:id', async (request: Request, response: Response, next: NextFunction) => {
+    this.router.get('/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
-        const user = await this.store.get(request.params.id);
+        const user = await this.store.get(request.auth.user.id);
         response.json(user);
       } catch(error) {
         next(error);
       }
     });
-    this.router.put('/', async (request: Request, response: Response, next: NextFunction) => {
+    this.router.put('/self', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
-        const user = request.body;
-        await this.store.put(user.id, user);
-        await this.subscriptionHandler.sendMessageToSubscribers(`${user.id}`, user);
-        response.json(request.body);
+        const userId = request.auth.user.id;
+        const user = { ...request.body, id: userId };
+        await this.store.put(userId, user);
+        await this.subscriptionHandler.sendMessageToSubscribers(`${userId}`, user);
+        response.json(user);
       } catch(error) {
         next(error);
       }
     });
-    this.router.post('/:id/action', async (request: Request, response: Response, next: NextFunction) => {
+    this.router.post('/self/action', async (request: RequestWithAuth, response: Response, next: NextFunction) => {
       try {
-        const user = await this.store.updateState(request.params.id, request.body, rootReducer);
+        const user = await this.store.updateState(request.auth.user.id, request.body, rootReducer);
         await this.subscriptionHandler.sendMessageToSubscribers(`${user.id}`, user);
         response.json(user);
       } catch(error) {
