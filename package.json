@@ -21,7 +21,7 @@
 				"@types/jest": "^25.2.1",
 				"@types/jsonwebtoken": "^8.5.0",
 				"@types/node": "^13.11.0",
-				"aws-sdk": "^2.674.0",
+				"aws-sdk": "^2.814.0",
 				"jest": "^25.3.0",
 				"serverless": "^1.70.1",
 				"serverless-offline": "^6.1.5",
