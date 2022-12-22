@@ -7,7 +7,7 @@
 		"dependencies": {
 				"aws-serverless-express": "^3.3.8",
 				"express": "^4.17.1",
-				"jsonwebtoken": "^8.5.1",
+				"jsonwebtoken": "^9.0.0",
 				"source-map-support": "^0.5.19"
 		},
 		"scripts": {
